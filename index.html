@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camisetas AJ | Catálogo Premium</title>
     
+    <!-- Favicon de la web -->
+    <link rel="icon" type="image/png" href="LOGO TRANSPARENTE.png">
+    <link rel="apple-touch-icon" href="LOGO TRANSPARENTE.png">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -76,7 +80,7 @@
         // --- INTEGRACIÓN IMGBB PARA FOTOS (100% GRATIS Y SIN ERRORES CORS) ---
         const IMGBB_API_KEY = "6e8f3835446a3b74af268f75bc7dd202";
 
-        // Función auxiliar para subir archivos usando ImgBB en lugar de Firebase Storage
+        // Función auxiliar para subir archivos usando ImgBB
         const uploadFileToStorage = async (file, folderName) => {
           if (!file) return null;
           
@@ -94,14 +98,14 @@
               throw new Error(data.error?.message || "Error al subir la imagen");
             }
             
-            return data.data.url; // Retorna la URL directa y gratuita de ImgBB
+            return data.data.url; 
           } catch (error) {
             console.error("Error subiendo foto:", error);
             throw error;
           }
         };
 
-        // CACHÉ DE MÓDULO (Para carga fluida de imágenes)
+        // CACHÉ DE MÓDULO
         const IMG_CACHE = {};
 
         const SmartImage = ({ src, alt, className, style, onClick }) => {
@@ -289,10 +293,7 @@
                 <div className="container mx-auto px-4 py-10 max-w-7xl">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-16 bg-white p-6 sm:p-8 rounded-[2rem] shadow-xl shadow-neutral-200/50 border border-neutral-100">
                         
-                        {/* SECCIÓN DE IMÁGENES CORREGIDA PARA MÓVIL */}
                         <div className="lg:col-span-7 flex flex-col-reverse md:flex-row gap-5 items-start min-w-0 w-full overflow-hidden md:overflow-visible">
-                            
-                            {/* GALERÍA DE MINIATURAS */}
                             <div className="flex md:flex-col gap-3 overflow-x-auto w-full md:w-24 flex-shrink-0 scrollbar-hide py-2 px-1 snap-x">
                                 {(product.gallery?.length > 0 ? product.gallery : [product.image]).map((img, i) => (
                                 <div 
@@ -304,8 +305,6 @@
                                 </div>
                                 ))}
                             </div>
-                            
-                            {/* IMAGEN PRINCIPAL */}
                             <div className="flex-grow w-full relative group min-w-0">
                                 <SmartImage src={mainImg} alt={product.name} className="w-full h-auto max-h-[500px] md:max-h-[700px] rounded-2xl shadow-sm border border-neutral-200/60 object-contain transition-transform duration-700 ease-out" />
                                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -485,7 +484,6 @@
           const [isCartOpen, setIsCartOpen] = useState(false);
           const [orderSuccess, setOrderSuccess] = useState(false);
 
-          // Estados de Autenticación
           const [isAdmin, setIsAdmin] = useState(false);
           const [isCustomerAuthenticated, setIsAuthenticated] = useState(false);
           const [showLoginModal, setShowLoginModal] = useState(false);
@@ -496,7 +494,6 @@
           const [loginError, setLoginError] = useState('');
           const [currentDiscount, setCurrentDiscount] = useState(null);
           
-          // POPUP PROMOCIONAL
           const [promoPopup, setPromoPopup] = useState({
             active: false,
             image: null,
@@ -507,7 +504,6 @@
 
           const [isFirebaseLoading, setIsFirebaseLoading] = useState(true);
 
-          // Estados de Creación de Producto
           const [isExtracting, setIsExtracting] = useState(false);
           const [extractSuccess, setExtractSuccess] = useState(false);
           const [uploadedImages, setUploadedImages] = useState([]);
@@ -516,7 +512,6 @@
           const [extractProgress, setExtractProgress] = useState('');
           const [coverImageIndex, setCoverImageIndex] = useState(0);
 
-          // Formularios de Panel
           const [newMasterPass, setNewMasterPass] = useState('');
           const [newAccessCode, setNewAccessCode] = useState('');
           const [newProdName, setNewProdName] = useState('');
@@ -527,11 +522,9 @@
           const [newCategoryIcon, setNewCategoryIcon] = useState(null);
           const [settingsSaved, setSettingsSaved] = useState(false);
 
-          // NUEVOS ESTADOS PARA CODIGOS VIP
           const [newCodeType, setNewCodeType] = useState('none');
           const [newCodeValue, setNewCodeValue] = useState('');
 
-          // Imágenes Globales (Lavado y Tallas)
           const [globalWashingImage, setGlobalWashingImage] = useState(null);
           const [fanSizeGuide, setFanSizeGuide] = useState(null);
           const [playerSizeGuide, setPlayerSizeGuide] = useState(null);
@@ -540,7 +533,6 @@
           const [tracksuitAdultSizeGuide, setTracksuitAdultSizeGuide] = useState(null);
           const [tracksuitKidsSizeGuide, setTracksuitKidsSizeGuide] = useState(null);
 
-          // --- EFECTO INICIAL FIREBASE ---
           useEffect(() => {
             signInAnonymously(auth).then(() => {
               const unsubSettings = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
@@ -567,7 +559,6 @@
 
               const unsubCategories = onSnapshot(collection(db, 'categories'), (snapshot) => {
                 const fetchedCats = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                // ORDENAR CATEGORÍAS SEGÚN SU CAMPO 'ORDER'
                 fetchedCats.sort((a, b) => (a.order || 0) - (b.order || 0));
                 setCategories(fetchedCats);
               });
@@ -592,7 +583,6 @@
           const visibleCategories = [{ name: 'Todos', icon: null }, ...categories];
           const filteredProducts = activeCategory === 'Todos' ? products : products.filter(p => p.league === activeCategory);
 
-          // --- ACCIONES ADMIN FIREBASE ---
           const handleSaveSettings = async () => {
             try {
               const updatedPass = newMasterPass.trim().length > 0 ? newMasterPass : adminPassword;
@@ -641,7 +631,6 @@
                        finalIconUrl = await uploadFileToStorage(fileInput.files[0], 'categories');
                     }
                 }
-                // ASIGNAR UN NÚMERO DE ORDEN AL CREAR LA CATEGORÍA
                 await addDoc(collection(db, 'categories'), { name: newCategoryName, icon: finalIconUrl, order: categories.length });
                 setNewCategoryName('');
                 setNewCategoryIcon(null);
@@ -661,7 +650,6 @@
             }
           };
 
-          // NUEVA FUNCIÓN PARA MOVER CATEGORÍAS ARRIBA Y ABAJO
           const moveCategory = async (index, direction) => {
             const newCategories = [...categories];
             if (index + direction < 0 || index + direction >= newCategories.length) return;
@@ -670,7 +658,7 @@
             newCategories[index] = newCategories[index + direction];
             newCategories[index + direction] = temp;
             
-            setCategories([...newCategories]); // Actualización visual rápida
+            setCategories([...newCategories]); 
             
             try {
                 for (let i = 0; i < newCategories.length; i++) {
@@ -704,6 +692,33 @@
               setEditingProduct(null);
             } catch (error) {
               alert("Error al guardar cambios: " + error.message);
+            }
+          };
+
+          const extractFromYupoo = async () => {
+            if (!yupooUrl) return;
+            setIsExtractingUrl(true);
+            setUploadedImages([]);
+            setCoverImageIndex(0);
+            try {
+              setExtractProgress('Conectando...');
+              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yupooUrl)}`);
+              const data = await res.json();
+              const html = data.contents || '';
+              const folderPaths = new Set();
+              const folderRegex = /yupoo\.com\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)\//gi;
+              let match;
+              while ((match = folderRegex.exec(html)) !== null) {
+                folderPaths.add(match[1]);
+              }
+              const validPhotos = Array.from(folderPaths).map(folder => `https://photo.yupoo.com/${folder}/small.jpg`);
+              const newPreviewObjs = validPhotos.map(url => ({ url, fileObj: null }));
+              setUploadedImages(newPreviewObjs);
+              setExtractProgress('Listo');
+            } catch (e) {
+              alert('Error en extracción');
+            } finally {
+              setIsExtractingUrl(false);
             }
           };
 
@@ -761,34 +776,6 @@
             }
           };
 
-          const extractFromYupoo = async () => {
-            if (!yupooUrl) return;
-            setIsExtractingUrl(true);
-            setUploadedImages([]);
-            setCoverImageIndex(0);
-            try {
-              setExtractProgress('Conectando...');
-              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yupooUrl)}`);
-              const data = await res.json();
-              const html = data.contents || '';
-              const folderPaths = new Set();
-              const folderRegex = /yupoo\.com\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)\//gi;
-              let match;
-              while ((match = folderRegex.exec(html)) !== null) {
-                folderPaths.add(match[1]);
-              }
-              const validPhotos = Array.from(folderPaths).map(folder => `https://photo.yupoo.com/${folder}/small.jpg`);
-              const newPreviewObjs = validPhotos.map(url => ({ url, fileObj: null }));
-              setUploadedImages(newPreviewObjs);
-              setExtractProgress('Listo');
-            } catch (e) {
-              alert('Error en extracción');
-            } finally {
-              setIsExtractingUrl(false);
-            }
-          };
-
-          // --- COMPRESIÓN LOCAL PARA IMGBB ---
           const comprimirImagen = (file) => {
             return new Promise((resolve) => {
                 if (!file.type.match(/image.*/)) {
@@ -863,7 +850,6 @@
             }
           };
 
-          // --- LÓGICA DE CARRITO Y PEDIDO ---
           const addToCart = (product, size, customization) => {
             setCart(prev => {
               const existing = prev.find(item => 
@@ -895,7 +881,6 @@
             }));
           };
 
-          // CALCULO DESCUENTOS
           const subtotalCart = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
           const totalItemsCart = cart.reduce((sum, item) => sum + item.quantity, 0);
           
@@ -1581,42 +1566,6 @@
                 </div>
               )}
 
-              {/* MODAL POP-UP PROMOCIONAL */}
-              {promoPopup.active && !hasClosedPopup && (isCustomerAuthenticated || isAdmin) && !isScraperOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-500">
-                  <div className="bg-white rounded-[2rem] overflow-hidden max-w-md w-full flex flex-col shadow-[0_0_60px_rgba(220,38,38,0.3)] animate-in zoom-in-95 duration-500 relative border border-neutral-100">
-                    <button 
-                      onClick={() => setHasClosedPopup(true)}
-                      className="absolute top-4 right-4 bg-white/50 hover:bg-red-600 text-black hover:text-white p-2 rounded-full backdrop-blur-md transition-colors z-10 shadow-sm"
-                    >
-                      <X size={20} />
-                    </button>
-                    
-                    {promoPopup.image && (
-                      <div className="w-full max-h-64 bg-neutral-100 flex items-center justify-center overflow-hidden">
-                        <img src={promoPopup.image} alt="Promoción" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    
-                    <div className="p-8 text-center bg-white relative z-10">
-                      <div className="w-16 h-1 bg-red-600 mx-auto rounded-full mb-6"></div>
-                      <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-neutral-900 leading-none drop-shadow-sm">
-                        {promoPopup.title}
-                      </h3>
-                      <p className="text-neutral-500 font-bold text-sm leading-relaxed mb-8">
-                        {promoPopup.description}
-                      </p>
-                      <button 
-                        onClick={() => setHasClosedPopup(true)}
-                        className="w-full bg-gradient-to-r from-neutral-900 to-black hover:from-black hover:to-neutral-800 text-white font-black py-4 rounded-xl text-sm uppercase tracking-widest transition-all shadow-xl active:scale-95 border border-neutral-800"
-                      >
-                        Continuar a la tienda
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* MODAL EDITAR PRODUCTO */}
               {editingProduct && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -1666,6 +1615,42 @@
                           Guardar Cambios
                       </button>
                     </form>
+                  </div>
+                </div>
+              )}
+
+              {/* MODAL POP-UP PROMOCIONAL */}
+              {promoPopup.active && !hasClosedPopup && (isCustomerAuthenticated || isAdmin) && !isScraperOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-500">
+                  <div className="bg-white rounded-[2rem] overflow-hidden max-w-md w-full flex flex-col shadow-[0_0_60px_rgba(220,38,38,0.3)] animate-in zoom-in-95 duration-500 relative border border-neutral-100">
+                    <button 
+                      onClick={() => setHasClosedPopup(true)}
+                      className="absolute top-4 right-4 bg-white/50 hover:bg-red-600 text-black hover:text-white p-2 rounded-full backdrop-blur-md transition-colors z-10 shadow-sm"
+                    >
+                      <X size={20} />
+                    </button>
+                    
+                    {promoPopup.image && (
+                      <div className="w-full max-h-64 bg-neutral-100 flex items-center justify-center overflow-hidden">
+                        <img src={promoPopup.image} alt="Promoción" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    
+                    <div className="p-8 text-center bg-white relative z-10">
+                      <div className="w-16 h-1 bg-red-600 mx-auto rounded-full mb-6"></div>
+                      <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-4 text-neutral-900 leading-none drop-shadow-sm">
+                        {promoPopup.title}
+                      </h3>
+                      <p className="text-neutral-500 font-bold text-sm leading-relaxed mb-8">
+                        {promoPopup.description}
+                      </p>
+                      <button 
+                        onClick={() => setHasClosedPopup(true)}
+                        className="w-full bg-gradient-to-r from-neutral-900 to-black hover:from-black hover:to-neutral-800 text-white font-black py-4 rounded-xl text-sm uppercase tracking-widest transition-all shadow-xl active:scale-95 border border-neutral-800"
+                      >
+                        Continuar a la tienda
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

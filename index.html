@@ -55,7 +55,7 @@
           ShoppingCart, Menu, X, Plus, Minus, Search, ExternalLink, Loader2, 
           CheckCircle, Camera, Image as ImageIcon, UploadCloud, ArrowLeft, 
           MessageCircle, Trash2, Lock, Unlock, Settings, FolderPlus, Key, 
-          ShieldCheck, UserCheck, ChevronRight, ChevronDown, Shield, Truck, RefreshCw, Scissors, Gift, Edit
+          ShieldCheck, UserCheck, ChevronRight, ChevronDown, Shield, Truck, RefreshCw, Scissors, Gift, Edit, Star
         } from 'lucide-react';
 
         // --- INTEGRACIÓN FIREBASE ---
@@ -205,9 +205,19 @@
               )}
               <div className="relative h-72 overflow-hidden bg-neutral-100" onClick={() => onClick(product)}>
                 <SmartImage src={mainImg} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
-                <div className={`absolute top-3 left-3 bg-gradient-to-r ${badge.bg} text-white text-[10px] font-black px-3 py-1 rounded shadow-lg uppercase tracking-widest backdrop-blur-sm z-20`}>
-                  {badge.text}
+                
+                {/* ETIQUETAS */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20">
+                    <div className={`bg-gradient-to-r ${badge.bg} text-white text-[10px] font-black px-3 py-1 rounded shadow-lg uppercase tracking-widest backdrop-blur-sm w-max`}>
+                      {badge.text}
+                    </div>
+                    {product.featured && (
+                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black px-2.5 py-1 rounded shadow-lg uppercase tracking-widest backdrop-blur-sm flex items-center gap-1 w-max">
+                            <i className="fa-solid fa-star"></i> TOP VENTAS
+                        </div>
+                    )}
                 </div>
+
                 <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/80 backdrop-blur-sm text-white p-3 rounded-full shadow-xl hover:bg-red-600 hover:scale-110 z-20">
                     <Plus size={20} />
                 </div>
@@ -306,6 +316,11 @@
                                 ))}
                             </div>
                             <div className="flex-grow w-full relative group min-w-0">
+                                {product.featured && (
+                                    <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg uppercase tracking-widest backdrop-blur-sm z-20 flex items-center gap-1.5">
+                                        <i className="fa-solid fa-star"></i> TOP VENTAS
+                                    </div>
+                                )}
                                 <SmartImage src={mainImg} alt={product.name} className="w-full h-auto max-h-[500px] md:max-h-[700px] rounded-2xl shadow-sm border border-neutral-200/60 object-contain transition-transform duration-700 ease-out" />
                                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                     <Camera size={20} className="text-neutral-600" />
@@ -518,6 +533,7 @@
           const [newProdPrice, setNewProdPrice] = useState('30.00');
           const [newProdLeague, setNewProdLeague] = useState('La Liga');
           const [newProdSizeType, setNewProdSizeType] = useState('fan'); 
+          const [newProdFeatured, setNewProdFeatured] = useState(false);
           const [newCategoryName, setNewCategoryName] = useState('');
           const [newCategoryIcon, setNewCategoryIcon] = useState(null);
           const [settingsSaved, setSettingsSaved] = useState(false);
@@ -580,8 +596,18 @@
             });
           }, []);
 
-          const visibleCategories = [{ name: 'Todos', icon: null }, ...categories];
-          const filteredProducts = activeCategory === 'Todos' ? products : products.filter(p => p.league === activeCategory);
+          const visibleCategories = [{ name: 'Todos', icon: './camiseta-de-futbol.png' }, ...categories];
+          
+          // FILTRADO Y ORDENACIÓN (LOS DESTACADOS PRIMERO)
+          const filteredProducts = (activeCategory === 'Todos' ? products : products.filter(p => p.league === activeCategory))
+            .sort((a, b) => {
+                const aFeatured = a.featured ? 1 : 0;
+                const bFeatured = b.featured ? 1 : 0;
+                if (bFeatured !== aFeatured) {
+                    return bFeatured - aFeatured; // Los Destacados van primero
+                }
+                return b.createdAt - a.createdAt; // Luego ordenados por más reciente
+            });
 
           const handleSaveSettings = async () => {
             try {
@@ -687,7 +713,8 @@
                 price: parseFloat(editingProduct.price),
                 oldPrice: editingProduct.oldPrice ? parseFloat(editingProduct.oldPrice) : null,
                 league: editingProduct.league,
-                sizeGuideType: editingProduct.sizeGuideType
+                sizeGuideType: editingProduct.sizeGuideType,
+                featured: editingProduct.featured || false
               });
               setEditingProduct(null);
             } catch (error) {
@@ -757,6 +784,7 @@
                 sizeGuideType: newProdSizeType,
                 image: mainImage,
                 gallery: finalImageUrls,
+                featured: newProdFeatured,
                 createdAt: Date.now()
               });
 
@@ -768,6 +796,7 @@
                 setUploadedImages([]); 
                 setCoverImageIndex(0); 
                 setNewProdName('');
+                setNewProdFeatured(false);
               }, 1500);
 
             } catch (error) {
@@ -972,15 +1001,6 @@
             }
           };
 
-          const handleRemoveUploadedImage = (idx) => {
-            setUploadedImages(prev => prev.filter((_, i) => i !== idx));
-            if (coverImageIndex === idx) {
-              setCoverImageIndex(0);
-            } else if (coverImageIndex > idx) {
-              setCoverImageIndex(prev => prev - 1);
-            }
-          };
-
           if (isFirebaseLoading) {
             return <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white"><Loader2 className="animate-spin text-red-600 mb-4" size={48} /><p className="tracking-widest font-black uppercase italic">Conectando Servidor...</p></div>
           }
@@ -1090,7 +1110,17 @@
                     {visibleCategories.map(cat => (
                       <li key={cat.name} className="w-full lg:w-auto">
                         <button onClick={() => { setActiveCategory(cat.name); setSelectedProduct(null); setIsCartOpen(false); setIsMenuOpen(false); }} className={`w-full lg:w-auto px-5 py-4 lg:py-2.5 text-left lg:text-center text-[12px] lg:text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-4 lg:gap-2 rounded-xl lg:rounded-full ${activeCategory === cat.name ? 'text-white bg-white/10 shadow-inner ring-1 ring-white/20' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
-                          {cat.icon && <img src={cat.icon} alt="" className={`w-6 h-6 lg:w-5 lg:h-5 object-contain transition-all duration-300 invert mix-blend-screen ${activeCategory === cat.name ? 'opacity-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] scale-110' : 'opacity-60'}`} />}
+                          {cat.icon && (
+                            <img 
+                              src={cat.icon} 
+                              alt={cat.name} 
+                              onError={(e) => {
+                                e.target.onerror = null; 
+                                e.target.src = "https://cdn-icons-png.flaticon.com/512/1865/1865805.png";
+                              }}
+                              className={`w-6 h-6 lg:w-5 lg:h-5 object-contain transition-all duration-300 invert mix-blend-screen ${activeCategory === cat.name ? 'opacity-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] scale-110' : 'opacity-60'}`} 
+                            />
+                          )}
                           {cat.name}
                         </button>
                       </li>
@@ -1551,6 +1581,21 @@
                                   </select>
                                 </div>
                               </div>
+                              
+                              {/* NUEVO BOTÓN DESTACADO */}
+                              <div className="flex items-center justify-between bg-amber-50/50 border-2 border-amber-100 p-4 rounded-xl mt-4">
+                                  <div>
+                                      <h5 className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Producto Destacado</h5>
+                                      <p className="text-[9px] text-amber-500 font-bold">Marcar como Top Ventas (Aparecerá primero)</p>
+                                  </div>
+                                  <button 
+                                    type="button"
+                                    onClick={() => setNewProdFeatured(!newProdFeatured)}
+                                    className={`w-12 h-6 rounded-full transition-colors relative shadow-inner ${newProdFeatured ? 'bg-amber-500' : 'bg-neutral-300'}`}
+                                  >
+                                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${newProdFeatured ? 'left-7' : 'left-1'}`}></div>
+                                  </button>
+                              </div>
                           </div>
                           
                           <button disabled={isExtractingUrl || isExtracting} className="relative w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-black py-6 rounded-2xl text-xl uppercase italic tracking-[0.2em] shadow-[0_15px_30px_-10px_rgba(220,38,38,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(220,38,38,0.6)] hover:-translate-y-1 transition-all active:translate-y-0 active:scale-[0.98] mt-4 overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed">
@@ -1609,6 +1654,21 @@
                                   <option value="tracksuit_kids">Chándal Niños</option>
                               </select>
                           </div>
+                      </div>
+                      
+                      {/* DESTACADO EN EDICIÓN */}
+                      <div className="flex items-center justify-between bg-amber-50/50 border-2 border-amber-100 p-4 rounded-xl mt-2">
+                          <div>
+                              <h5 className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Producto Destacado</h5>
+                              <p className="text-[9px] text-amber-500 font-bold">Marcar como Top Ventas (Aparecerá primero)</p>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => setEditingProduct({...editingProduct, featured: !editingProduct.featured})}
+                            className={`w-12 h-6 rounded-full transition-colors relative shadow-inner ${editingProduct.featured ? 'bg-amber-500' : 'bg-neutral-300'}`}
+                          >
+                            <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${editingProduct.featured ? 'left-7' : 'left-1'}`}></div>
+                          </button>
                       </div>
                       
                       <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl mt-6 uppercase tracking-widest transition-colors shadow-lg active:scale-95 flex justify-center items-center gap-2">

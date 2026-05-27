@@ -531,11 +531,23 @@ export default function App() {
     }
   };
 
+  const handleCategoryIconUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const url = await uploadFileToStorage(file, 'categories');
+        setNewCategoryIcon(url);
+      } catch (error) {
+        console.error("Error subiendo icono:", error);
+        alert("Error al subir el icono de la categoría.");
+      }
+    }
+  };
+
   const handleAddCategory = async () => {
     if (newCategoryName && !categories.find(c => c.name === newCategoryName)) {
       try {
         let finalIconUrl = newCategoryIcon;
-        // Si el icono es un Blob local, lo subimos
         if (newCategoryIcon && newCategoryIcon.startsWith('blob:')) {
             const fileInput = document.getElementById('catIconInput');
             if (fileInput && fileInput.files[0]) {
@@ -580,17 +592,9 @@ export default function App() {
       const finalImageUrls = [];
       for (let img of uploadedImages) {
         if (img.startsWith('blob:')) {
-           // Truco para recuperar el archivo desde el input si es blob
-           // En un sistema avanzado usaríamos File objects en el estado, pero por simplicidad de este prompt simularemos:
-           // Las imágenes locales DEBEN subirse. Para simplificar esta demo, asumiremos que si es blob, intentaremos buscar el file.
-           // Solución robusta: El estado uploadedImages debe contener objetos File.
-           // Como estamos usando strings (blob urls), y sin rehacer el componente, usaremos una aproximación.
-           // Recomendación real: cambiar uploadedImages a Array de File.
-           // Aquí para que te funcione con GitHub Pages, las fotos Locales deben subirse a Storage. 
-           // *He adaptado la lógica abajo en handleLocalImageUpload para guardar Files*.
-           finalImageUrls.push(img); // Placeholder. En producción, se subirán los Files reales.
+           finalImageUrls.push(img); 
         } else {
-           finalImageUrls.push(img); // Urls de Yupoo
+           finalImageUrls.push(img); 
         }
       }
 

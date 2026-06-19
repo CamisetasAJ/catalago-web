@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camisetas AJ | Catálogo Premium</title>
     
-    <!-- Favicon de la web -->
     <link rel="icon" type="image/png" href="LOGO TRANSPARENTE.png">
     <link rel="apple-touch-icon" href="LOGO TRANSPARENTE.png">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- FontAwesome Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Import Maps: El mapa que le dice al navegador de dónde descargar React y Firebase -->
     <script type="importmap">
     {
         "imports": {
             "react": "https://esm.sh/react@18.2.0",
+            "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
             "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
             "lucide-react": "https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0",
             "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
@@ -29,7 +26,6 @@
     }
     </script>
 
-    <!-- Babel: El traductor que convierte React a código normal en vivo -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
@@ -44,10 +40,8 @@
 </head>
 <body class="bg-neutral-50 font-sans selection:bg-red-200 selection:text-red-900 overflow-x-hidden text-neutral-800">
 
-    <!-- Aquí es donde React "inyectará" toda la tienda automáticamente -->
     <div id="root"></div>
 
-    <!-- CÓDIGO REACT DE TU TIENDA -->
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
